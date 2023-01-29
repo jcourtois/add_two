@@ -14,11 +14,18 @@ impl ListNode {
         ListNode { next: None, val }
     }
 
+    #[cfg(test)]
     fn from_array(input: &[i32]) -> Option<Box<ListNode>> {
         match input.len() {
             0 => None,
-            1 => Some(Box::new(ListNode { val: input[0], next: None })),
-            _ => Some(Box::new(ListNode { val: input[0], next: Self::from_array(&input[1..]) }))
+            1 => Some(Box::new(ListNode {
+                val: input[0],
+                next: None,
+            })),
+            _ => Some(Box::new(ListNode {
+                val: input[0],
+                next: Self::from_array(&input[1..]),
+            })),
         }
     }
 }
@@ -34,20 +41,15 @@ pub fn add_two_numbers(
 
     let mut carry: i32 = 0;
 
-    while p != None || q != None {
-        let sum = match (&p, &q) {
-            (Some(l1), Some(l2)) => l1.val + l2.val + carry,
-            (Some(l1), None) => l1.val + carry,
-            (None, Some(l2)) => l2.val + carry,
-            (None, None) => carry,
-        };
+    while p.is_some() || q.is_some() {
+        let sum = carry + p.as_ref().map_or(0, |x| x.val) + q.as_ref().map_or(0, |x| x.val);
 
         carry = sum / 10;
         current.next = Some(Box::new(ListNode::new(sum % 10)));
         current = current.next.as_mut().unwrap();
 
-        p = if p != None { p.unwrap().next } else { p };
-        q = if q != None { q.unwrap().next } else { q };
+        p = if let Some(node) = p { node.next } else { p };
+        q = if let Some(node) = q { node.next } else { q };
     }
 
     if carry > 0 {
