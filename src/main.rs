@@ -9,7 +9,7 @@ pub struct ListNode {
 }
 
 impl ListNode {
-    #[inline]
+    #[cfg(test)]
     fn new(val: i32) -> ListNode {
         ListNode { next: None, val }
     }
@@ -30,33 +30,39 @@ impl ListNode {
     }
 }
 
-pub fn add_two_numbers(
-    l1: Option<Box<ListNode>>,
-    l2: Option<Box<ListNode>>,
-) -> Option<Box<ListNode>> {
-    let mut dummy_head = ListNode::new(0);
-    let mut current = &mut dummy_head;
-    let mut p = l1;
-    let mut q = l2;
+#[cfg(test)]
+struct Solution {}
 
-    let mut carry: i32 = 0;
+#[cfg(test)]
+impl Solution {
+    pub fn add_two_numbers(
+        l1: Option<Box<ListNode>>,
+        l2: Option<Box<ListNode>>,
+    ) -> Option<Box<ListNode>> {
+        let mut dummy_head = ListNode::new(0);
+        let mut current = &mut dummy_head;
+        let mut p = l1;
+        let mut q = l2;
 
-    while p.is_some() || q.is_some() {
-        let sum = carry + p.as_ref().map_or(0, |x| x.val) + q.as_ref().map_or(0, |x| x.val);
+        let mut carry: i32 = 0;
 
-        carry = sum / 10;
-        current.next = Some(Box::new(ListNode::new(sum % 10)));
-        current = current.next.as_mut().unwrap();
+        while p.is_some() || q.is_some() {
+            let sum = carry + p.as_ref().map_or(0, |x| x.val) + q.as_ref().map_or(0, |x| x.val);
 
-        p = if let Some(node) = p { node.next } else { p };
-        q = if let Some(node) = q { node.next } else { q };
+            carry = sum / 10;
+            current.next = Some(Box::new(ListNode::new(sum % 10)));
+            current = current.next.as_mut().unwrap();
+
+            p = if let Some(node) = p { node.next } else { p };
+            q = if let Some(node) = q { node.next } else { q };
+        }
+
+        if carry > 0 {
+            current.next = Some(Box::new(ListNode::new(carry)));
+        }
+
+        dummy_head.next
     }
-
-    if carry > 0 {
-        current.next = Some(Box::new(ListNode::new(carry)));
-    }
-
-    dummy_head.next
 }
 
 #[cfg(test)]
@@ -67,14 +73,14 @@ mod tests {
     fn case1() {
         let l1 = ListNode::from_array(&[2, 4, 3]);
         let l2 = ListNode::from_array(&[5, 6, 4]);
-        assert_eq!(add_two_numbers(l1, l2), ListNode::from_array(&[7, 0, 8]))
+        assert_eq!(Solution::add_two_numbers(l1, l2), ListNode::from_array(&[7, 0, 8]))
     }
 
     #[test]
     fn case2() {
         let l1 = ListNode::from_array(&[0]);
         let l2 = ListNode::from_array(&[0]);
-        assert_eq!(add_two_numbers(l1, l2), ListNode::from_array(&[0]))
+        assert_eq!(Solution::add_two_numbers(l1, l2), ListNode::from_array(&[0]))
     }
 
     #[test]
@@ -82,7 +88,7 @@ mod tests {
         let l1 = ListNode::from_array(&[9, 9, 9, 9, 9, 9, 9]);
         let l2 = ListNode::from_array(&[9, 9, 9, 9]);
         assert_eq!(
-            add_two_numbers(l1, l2),
+            Solution::add_two_numbers(l1, l2),
             ListNode::from_array(&[8, 9, 9, 9, 0, 0, 0, 1])
         )
     }
